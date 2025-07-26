@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Tracker PWA</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1f2937">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-gray-800 text-white p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">MangaMarks</h1>
+        <button id="mobile-menu-toggle" class="text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </header>
+
+    <div id="app" class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:relative w-64 bg-gray-800 text-gray-200 flex flex-col h-full z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white">MangaMarks</h2>
+                    <span class="text-xs text-gray-400">Local</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 mt-4 px-2">
+                <a href="#dashboard" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">📊</span> 
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="#my-manga" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">📚</span> 
+                    <span class="font-medium">My Manga</span>
+                </a>
+                <a href="#library" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">📖</span> 
+                    <span class="font-medium">Library</span>
+                </a>
+                <a href="#discover" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">⚡</span> 
+                    <span class="font-medium">Discover</span>
+                </a>
+                <a href="#bookmarks" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">🔖</span> 
+                    <span class="font-medium">Bookmarks</span>
+                </a>
+                <a href="#history" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">🕒</span> 
+                    <span class="font-medium">History</span>
+                </a>
+                <a href="#analytics" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">📈</span> 
+                    <span class="font-medium">Analytics</span>
+                </a>
+                <a href="#tags" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">🏷️</span> 
+                    <span class="font-medium">Tags</span>
+                </a>
+                <a href="#settings" class="nav-link flex items-center py-3 px-4 text-gray-200 hover:bg-gray-700 rounded-lg mx-2 mb-1 transition-colors duration-200">
+                    <span class="mr-3 text-lg">⚙️</span> 
+                    <span class="font-medium">Settings</span>
+                </a>
+            </nav>
+
+            <!-- Timer Button -->
+            <div class="p-4 border-t border-gray-700">
+                <button id="timer-button" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">⏱️</span>
+                    <span>Start Reading Session Timer</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Main Content Area -->
+            <div id="main-content" class="flex-1 p-4 md:p-6 overflow-y-auto">
+                <!-- Content will be loaded here dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Manga Modal -->
+    <div id="add-manga-modal" class="modal hidden" style="display: none;">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Add New Manga</h2>
+                <button onclick="uiController.closeAddMangaModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="add-manga-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input type="text" id="manga-title" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <select id="manga-type" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="manga">Manga</option>
+                                <option value="manhwa">Manhwa</option>
+                                <option value="manhua">Manhua</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="manga-status" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="reading">Reading</option>
+                                <option value="completed">Completed</option>
+                                <option value="on-hold">On Hold</option>
+                                <option value="dropped">Dropped</option>
+                                <option value="plan-to-read">Plan to Read</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Author</label>
+                        <input type="text" id="manga-author" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Current Chapter</label>
+                            <input type="number" id="manga-current-chapter" min="0" value="0" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total Chapters</label>
+                            <input type="number" id="manga-total-chapters" min="0" placeholder="Optional" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                        <input type="text" id="manga-tags" placeholder="Separate tags with commas" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="manga-notes" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="uiController.closeAddMangaModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Add Manga
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered: ', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
+
